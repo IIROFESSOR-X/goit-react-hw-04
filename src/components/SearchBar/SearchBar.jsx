@@ -1,39 +1,52 @@
-import toast, { Toaster } from 'react-hot-toast';
-import { IoIosSearch } from 'react-icons/io';
-import css from './SearchBar.module.css';
+import { useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import css from './SearchBar.module.css'
+import { RiSearchEyeLine } from "react-icons/ri";
 
-const SearchBar = ({ onSubmit }) => {
-  const handleSubmit = e => {
-    e.preventDefault();
-    const searchWord = e.target.elements.usertext.value.trim();
-    if (searchWord === ``) {
-      toast.error(`You need to fill in the search field`);
-      return;
-    } else {
-      onSubmit(searchWord);
-      e.target.reset();
-    }
-  };
+export default function SearchBar({ onSubmit }) {
+    const [query, setQuery] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const inputRef = useRef(null);
 
-  return (
-    <header className={css.header}>
-      <div>
-        <Toaster position="top-right" reverseOrder={false} />
-      </div>
-      <form className={css.form} onSubmit={handleSubmit}>
-        <input
-          className={css.input}
-          name="usertext"
-          type="text"
-          autoComplete="off"
-          autoFocus
-          placeholder="Search images and photos"
-        />
-        <button className={css.button} type="submit">
-          <IoIosSearch className={css.icon} />
-        </button>
-      </form>
-    </header>
-  );
-};
-export default SearchBar;
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const trimmedQuery = query.trim();
+        if (!trimmedQuery) {
+            toast.error('Please enter a search query!');
+            return;
+        }
+        
+        setIsSubmitting(true);
+        try {
+            await onSubmit(trimmedQuery);
+            setQuery('');
+        } catch (error) {
+            toast.error('An error occurred while fetching images.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    
+    return (
+        <header className={css.header}>          
+            <form className={css.form} onSubmit={handleSubmit}>
+                <button className={css.searchButton} type="submit" disabled={isSubmitting}>
+                     <RiSearchEyeLine size="18px"/>
+                </button>               
+                <input className={css.input}
+                    type="text"
+                    name="query"
+                    autoComplete="off"
+                    autoFocus
+                    placeholder="Search images and photos"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    ref={inputRef}
+                />
+                    {isSubmitting && <span>Searching...</span>}
+                </form>
+               
+        </header>
+    );
+}

@@ -1,12 +1,13 @@
-import css from './LoadMoreBtn.module.css';
-
-const LoadMoreBtn = ({ handleClick }) => {
-  return (
-    <div className={css.wrapperBtn}>
-      <button className={css.btn} onClick={handleClick} type="button">
-        Loade more
-      </button>
-    </div>
-  );
+const LoadMoreBtn = ({ onLoadMore, hasMoreImages }) => {
+    if (!hasMoreImages) {
+        return null;
+    }
+   
+    return (
+        <button onClick={onLoadMore}>
+            <p>Load more</p>
+        </button>
+    );
 };
+
 export default LoadMoreBtn;

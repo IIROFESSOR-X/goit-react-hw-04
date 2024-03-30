@@ -1,94 +1,83 @@
-import 'modern-normalize';
-import './App.css';
+import { useEffect, useState } from "react";
+import axios from "axios";
 import SearchBar from './SearchBar/SearchBar';
-import ImageGallery from './ImageGallery/ImageGallery';
-import fetchImages from './fetch-imege-api';
-import { useState, useEffect } from 'react';
-import Loader from './Loader/Loader';
-import ErrorMessage from './ErrorMessage/ErrorMessage';
-import LoadMoreBtn from './LoadMoreBtn/LoadMoreBtn';
-import { animateScroll as scroll } from 'react-scroll';
-import ImageModal from './ImageModal/ImageModal';
+import ImageGallery from "./ImageGallery/ImageGallery";
+import { fetchImages } from "./images-api";
+import {Toaster } from 'react-hot-toast';
+import Loader from "./Loader/Loader";
+import LoadMoreBtn from "./LoadMoreBtn/LoadMoreBtn";
+import ImageModal from "./ImageModal/ImageModal";
 
-const App = () => {
-  const [searchWord, setSearchWord] = useState(``);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+export default function App() {
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [imagesData, setImagesData] = useState([]);
-  const [errorMessage, setErrorMessage] = useState(``);
-  const [modal, setModal] = useState({ isOpen: false });
-
-  const fetchData = async (search, currentpage) => {
-    const query = search === searchWord ? imagesData : [];
-    try {
-      setModal({ isOpen: false });
-      setError(false);
-      setLoading(true);
-      const data = await fetchImages(search, currentpage);
-      if (data.message) setErrorMessage(data.message);
-
-      setImagesData([...query, ...data.results]);
-    } catch (error) {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onSubmit = searchText => {
-    setImagesData([]);
-    setSearchWord(searchText);
-    fetchData(searchText, 1);
-    setPage(1);
-    scroll.scrollTo(0);
-  };
-
-  const handleClick = () => {
-    fetchData(searchWord, page + 1);
-    setPage(page + 1);
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('')
+  
+ const accessKey = 'PAkOFV46TDL2tAhwdIk4TDzaP7RT3Nhx6tyEaOvJQ54'
 
   useEffect(() => {
-    if (page !== 1) {
-      const height = window.innerHeight - 130;
-      scroll.scrollMore(height);
-    }
-  }, [page]);
+		const apiUrl = `https://api.unsplash.com/search/photos?query=${searchTerm}&page=${page}&client_id=${accessKey}`
 
-  const handleImage = evt => {
-    const id = evt.target.dataset.id;
-    if (!id) return;
-    setModal({
-      isOpen: true,
-      id: Number(id),
-    });
-  };
+		const fetchImages = async () => {
+			try {
+				setIsLoading(true)
+				const response = await axios.get(apiUrl)
+				setImages(prevImages =>
+					page === 1
+						? response.data.results
+						: [...prevImages, ...response.data.results]
+				)
+			} catch (error) {
+				setError('Error fetching images. Please try again.')
+			} finally {
+				setIsLoading(false)
+			}
+		}
 
-  const isBtnOpen = imagesData.length > 19 && !loading;
-  const serchError = !error && imagesData.length == 0 && !loading && searchWord;
-  return (
-    <>
-      <SearchBar onSubmit={onSubmit} />
-      {error ? (
-        <ErrorMessage errorMessage={errorMessage} />
-      ) : (
-        imagesData.length > 0 && (
-          <ImageGallery onHandleImage={handleImage} imagesData={imagesData} />
-        )
-      )}
+		if (searchTerm) {
+			fetchImages()
+		}
+	}, [searchTerm, page, accessKey])
 
-      {loading && <Loader />}
-      {isBtnOpen && <LoadMoreBtn handleClick={handleClick} />}
-      {modal.isOpen && <ImageModal modal={modal} data={imagesData} />}
-      {serchError && (
-        <p className="serch-error">
-          Sorry, there are no images matching your search query. Please try
-          again!
-        </p>
-      )}
-    </>
-  );
+  
+ const handleSearch = async (searchQuery) => {
+    setIsLoading(true); 
+    try {
+        const data = await fetchImages(searchQuery, page, accessKey);
+        setImages(data);
+    } catch (error) {
+        setError('Error fetching images. Please try again.');
+    } finally {
+        setIsLoading(false);
+    }  
 };
 
-export default App;
+const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1); // Increment page
+}; 
+ 
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+    setIsModalOpen(true); 
+  };
+
+ const closeModal = () => {
+    setIsModalOpen(false); 
+  };
+
+  return (
+    <div >
+      <SearchBar onSubmit={handleSearch} />
+      {isLoading && <Loader />}
+      {error && <div>{error}</div>}
+      <Toaster />
+      <ImageGallery images={images} onImageClick={handleImageClick} />
+      {images.length > 0 && <LoadMoreBtn onLoadMore={handleLoadMore} />}
+      <ImageModal isOpen={isModalOpen} onRequestClose={closeModal} image={selectedImage} />
+    </div>
+  );
+}
