@@ -1,13 +1,8 @@
-const LoadMoreBtn = ({ onLoadMore, hasMoreImages }) => {
-    if (!hasMoreImages) {
-        return null;
-    }
-   
-    return (
-        <button onClick={onLoadMore}>
-            <p>Load more</p>
-        </button>
-    );
-};
-
-export default LoadMoreBtn;
+import css from "./LoadMoreBtn.module.css";
+export default function LoadMoreBtn({ loadMore }) {
+  return (
+    <button className={css.button} onClick={() => loadMore()}>
+      Load more
+    </button>
+  );
+}

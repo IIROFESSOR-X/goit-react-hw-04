@@ -1,9 +1,12 @@
-const ImageCard = ({ image, onClick }) => {
-    return (
-        <div onClick={onClick}>
-            <img src={image.urls.small} alt={image.description} />
-        </div>
-    );
-};
-
-export default ImageCard;
+import css from "./ImageCard.module.css";
+export default function ImageCard({ image, onClick }) {
+  return (
+    <div className={css.wrapper} onClick={onClick}>
+      <img
+        className={css.image}
+        src={image.urls.small}
+        alt={image.description}
+      />
+    </div>
+  );
+}
