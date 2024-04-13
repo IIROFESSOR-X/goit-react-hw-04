@@ -1,37 +1,40 @@
-import toast, { Toaster } from "react-hot-toast";
-import css from "./SearchBar.module.css";
-import { IoSearchOutline } from "react-icons/io5";
-export default function SearchBar({ onSearch }) {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const topic = form.elements.topic.value;
-    if (topic.trim() === "") {
-      toast.error("You should enter a search term!", {
-        position: "top-center",
-      });
-      return;
+import css from './SearchBar.module.css';
+import toast from 'react-hot-toast';
+
+const notify = () => toast.error('Enter search query first.');
+
+const SearchBar = ({ onSubmit }) => {
+  const hendleSubmit = event => {
+    event.preventDefault();
+
+    const form = event.target;
+    const inputValue = form.elements.input.value;
+    const trimedValue = inputValue.trim().toLowerCase();
+
+    if (!trimedValue) {
+      return notify();
     }
-    onSearch(topic);
+    onSubmit(trimedValue);
     form.reset();
   };
 
   return (
     <header className={css.header}>
-      <form className={css.form} onSubmit={handleSubmit}>
-        <button className={css.button} type="submit">
-          <IoSearchOutline size="20px" />
-        </button>
+      <form onSubmit={hendleSubmit}>
         <input
-          className={css.input}
           type="text"
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
-          name="topic"
+          name="input"
+          className={css.input}
         />
-        <Toaster />
+        <button type="submit" className={css.btn}>
+          Search
+        </button>
       </form>
     </header>
   );
-}
+};
+
+export default SearchBar;

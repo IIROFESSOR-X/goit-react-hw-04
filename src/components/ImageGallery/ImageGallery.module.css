@@ -1,8 +1,7 @@
-.list {
-  margin-top: 40px;
-  list-style-type: none;
+.gallery {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
 }

@@ -1,3 +1,7 @@
-export default function ErrorMessage() {
-  return <p>Error, please reload the page...</p>;
+const ErrorMessage = () => {
+  return (
+    <div>Something went wrong. Please try again after reloading the page</div>
+  )
 }
+
+export default ErrorMessage

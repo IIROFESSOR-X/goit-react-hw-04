@@ -1,10 +1,20 @@
-.image {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
+.imgWrapper {
+  height: 300px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: lightcyan;
+  border-radius: 8px;
+  border: 2px solid lightgray;
+  transition: scale 250ms ease-in-out;
 }
 
-.wrapper {
-  height: 400px;
-  width: 400px;
+.img {
+  height: auto;
+  max-height: 100%;
+}
+
+.imgWrapper:hover {
+  scale: 1.05;
 }
